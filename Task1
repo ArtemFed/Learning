@@ -1,0 +1,39 @@
+using System;
+
+namespace ConsoleApp1
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            string Istr = Console.ReadLine();
+            double I;
+            if (!(double.TryParse(Istr, out I)))
+                Console.WriteLine("Incorrect input");
+            else
+            {
+                if (I != Math.Floor(I))
+                {
+                    double Imin = Math.Floor(I);
+                    double Imax = Math.Ceiling(I);
+                    if (Math.Abs(Imax - I) < Math.Abs(Imin - I))
+                        Console.WriteLine(Imax);
+                    else
+                    {
+                        if (Math.Abs(Imax - I) > Math.Abs(Imin - I))
+                            Console.WriteLine(Imin);
+                        else
+                        {
+                            if (Math.Abs(Imax % 2) == 1)
+                                Console.WriteLine(Imax);
+                            else
+                                Console.WriteLine(Imin);
+                        }
+                    }
+                }
+                else
+                    Console.WriteLine("Incorrect input");
+            }
+        }
+    }
+}
