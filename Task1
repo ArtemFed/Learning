@@ -1,39 +1,111 @@
 using System;
 
-namespace ConsoleApp1
+namespace PeerGrade1
 {
     class Program
     {
-        static void Main(string[] args)
+
+        static void Main(string[] args)     // Основная часть кода
         {
-            string Istr = Console.ReadLine();
-            double I;
-            if (!(double.TryParse(Istr, out I)))
-                Console.WriteLine("Incorrect input");
-            else
+            do
             {
-                if (I != Math.Floor(I))
+                Console.WriteLine(" Правила игры \"Bulls and Cows\": \n" +
+                    "  1. Компьютер загадывает случайное число, состоящее из неповторяющихся цифр. \n" +
+                    "  2. Пользователь пытаеться угадать это число, называя свои. \n" +
+                    "  3. Компьютер отвечает количеством Быков (Bull) и Коров (Cow). \n" +
+                    "  Пояснение: \"Корова\" означает то, что цифра есть, но стоит не на том месте, \n" +
+                    "    а \"Бык\" говорит о том, что цифра полностью совпала (одна \"Корова\"/\"Бык\" = одна цифра) \n");
+                Console.Write(" Перед началом игры выберите(введите) уровень сложности от 1 до 10! \n (Сложность - это длина числа, которое вам предстоит угадать) \n");
+
+                int DifficultyL;            // Длинны числа (сложность игры)
+                string CompNumberStr;       // Число от Компьютера
+
+                DifficultyL = Difficulty();         // Получение длинны числа от Пользователя (сложности игры) 
+                CompNumberStr = RandomCompStr(DifficultyL);         // Получение числа от Компьютера
+
+                int FinalCountTry = BullsAndCows(DifficultyL, CompNumberStr);       // Обратоботка попыток Пользователя и получение итогового числа попыток
+
+                Console.WriteLine($"\n Поздравляю! Вы угадали моё число всего с {FinalCountTry} попытки! \n Это число:  {CompNumberStr}");
+
+                Console.WriteLine(" Хотите начать заново? Нажмите любую клавишу, иначе \"Escape\"");
+            } while (Console.ReadKey(true).Key != ConsoleKey.Escape);       // Добавление реиграбельности
+
+        }   // Конец метода "Main"
+
+        static int Difficulty()         // Выбор длинны числа (сложность игры) 
+        {
+            int DifficultyLen;          //DifficultyLen - длинны числа (сложность игры)
+            string DifficultyLStr;      // DifficultyLStr - длинны числа в формате строки
+
+            do      // Получение длины числа (сложности) от Пользователя и проверка её на правильность (число от 1 до 10)
+            {
+                Console.Write(" Сложность: ");
+                DifficultyLStr = Console.ReadLine();
+                if (!(int.TryParse(DifficultyLStr, out DifficultyLen) && (DifficultyLen > 0) && (DifficultyLen < 11)))
                 {
-                    double Imin = Math.Floor(I);
-                    double Imax = Math.Ceiling(I);
-                    if (Math.Abs(Imax - I) < Math.Abs(Imin - I))
-                        Console.WriteLine(Imax);
-                    else
+                    Console.WriteLine(" Вы вели не число, или его сложность превосходит 10 или меньше 1");
+                }
+            } while (!(int.TryParse(DifficultyLStr, out DifficultyLen) && (DifficultyLen > 0) && (DifficultyLen < 11)));
+
+            return DifficultyLen;
+        }   // Конец метода "Difficulty"
+
+        static string RandomCompStr(int DifficultyL)
+        {
+            var Rnd = new Random();
+            int IndexRandom, FirstFigure = Rnd.Next(1, 9);      // Получение первой цифры для числа Компьютера от 1 до 9 (без 0, такое условие)            
+            string CompNumber = FirstFigure.ToString();         // Строковая переменная, в которой будет "собираться" число
+            string numbers = "0123456789";
+            char Figure;
+
+            for (int i = 1; i < DifficultyL; i++)          // Цикл для того, чтобы собрать число именно такой длинны, которой пожилал Пользователь  
+            {
+                IndexRandom = Rnd.Next(0, 10);             // Получение случайного индекса для строки со всеми цифрами
+                Figure = numbers[IndexRandom];             // Получение цифры по случайному индексу
+                while (CompNumber.IndexOf(Figure) != -1)      // Проверка на то, чтобы такая цифра ещё не встречалась, если это не так, то заново получаю число по случайному индексу
+                    Figure = numbers[Rnd.Next(0, 10)];
+                CompNumber = CompNumber + Figure;                      // Получаю число от компьютера в формате строки
+            }
+            //Console.WriteLine(CompNumber);    // Число компьютера(если самому лень думать...)
+            return CompNumber;
+        }   // Конец метода "RandomCompStr"
+
+        static int BullsAndCows(int DifficultyL, string CompNumberStr)     // Ввод вашего числа и его обработка
+        {
+            int Number;           // Number - Число Пользвателя
+            string NumberStr;     // NumberStr - Число Пользвателя в формате строки
+            int Bull, Cow;        // "Быки" и "Коровы" для ответа Компьютера
+            int CountTry = 0;     // Для подсчёта количества попыток
+            do
+            {
+                ++CountTry;       // Увеличение количества попыток
+                Bull = 0;         // Для каждого нового числа попыток количество "Быков" и "Коров" будет высчитываться заново
+                Cow = 0;
+                Console.WriteLine($"\n Попытка номер - {CountTry}");    // Счётчик попыток
+                do
+                {       // Ввод числа Пользвателя и проверка его на корректность
+                    Console.Write(" Введите число, чтобы угадать моё: ");
+                    NumberStr = Console.ReadLine();
+                    if (!(int.TryParse(NumberStr, out Number) && (DifficultyL == NumberStr.Length)))
+                        Console.WriteLine($" Вы вели не число, или его длина не совпадает со сложностью \n Напоминаю, Ваша сложность {DifficultyL}");
+                } while (!(int.TryParse(NumberStr, out Number) && (DifficultyL == NumberStr.Length)));
+
+                for (int i = 0; i < DifficultyL; i++)       // Проверка каждой цифры в числе с помощью цикла
+                {
+                    if (CompNumberStr.IndexOf(NumberStr[i]) != -1)  // Если такой цифры в числе нет, то индекс будет равен "-1", поэтому, если он не равен "-1", то цифра присутствует
                     {
-                        if (Math.Abs(Imax - I) > Math.Abs(Imin - I))
-                            Console.WriteLine(Imin);
-                        else
+                        ++Cow;          // Если такая цифра есть, то это "Корова" или "Бык"
+                        if (CompNumberStr[i] == NumberStr[i])       //Если по этому индексу значения совпали, то это "Бык", иначе это "Корова"
                         {
-                            if (Math.Abs(Imax % 2) == 1)
-                                Console.WriteLine(Imax);
-                            else
-                                Console.WriteLine(Imin);
+                            --Cow;
+                            ++Bull;
                         }
                     }
                 }
-                else
-                    Console.WriteLine("Incorrect input");
-            }
-        }
+                Console.WriteLine($"    Cow: {Cow} из {DifficultyL}\n    Bull: {Bull} из {DifficultyL}");
+            } while (Bull != DifficultyL);      // Таким образом, пока Пользователь польность не угадает число, игра не закончится
+            return CountTry;
+        }   // Конец метода "BullsAndCows"
+
     }
 }
